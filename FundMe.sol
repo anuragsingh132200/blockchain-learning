@@ -76,6 +76,10 @@ contract FundMe {
     //   yes   no
     //  /        \
     //receive()  fallback()
+    function transferOwnership(address newOwner) public onlyOwner {
+        require(newOwner != address(0), "Invalid new owner address");
+        i_owner = newOwner;
+    }
 
     fallback() external payable {
         fund();
