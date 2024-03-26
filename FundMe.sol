@@ -1,12 +1,13 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.8;
 
-// Remove the import statement for PriceConverter.sol
+// Import PriceConverter library
+import "./PriceConverter.sol";
 
 error NotOwner();
 
 contract FundMe {
-    // Remove the "using PriceConverter for uint256;" statement
+    using PriceConverter for uint256;
 
     mapping(address => uint256) public addressToAmountFunded;
     address[] public funders;
@@ -19,11 +20,12 @@ contract FundMe {
     }
 
     function fund() public payable {
-        require(msg.value >= MINIMUM_USD, "You need to spend more ETH!");
+        require(msg.value.getConversionRate() >= MINIMUM_USD, "You need to spend more ETH!");
         
         bool isFunder = false;
         for(uint256 i = 0; i < funders.length; i++) {
             if(funders[i] == msg.sender) {
+                addressToAmountFunded[msg.sender] += msg.value;
                 isFunder = true;
                 break;
             }
@@ -49,6 +51,10 @@ contract FundMe {
         (bool callSuccess, ) = payable(msg.sender).call{value: address(this).balance}("");
         require(callSuccess, "Call failed");
     }
+    function transferOwnership(address newOwner) public onlyOwner {
+        require(newOwner != address(0), "Invalid new owner address");
+        i_owner = newOwner;
+    }
 
     fallback() external payable {
         fund();
@@ -57,4 +63,5 @@ contract FundMe {
     receive() external payable {
         fund();
     }
+
 }
