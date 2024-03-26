@@ -22,9 +22,20 @@ contract FundMe {
 
     function fund() public payable {
         require(msg.value.getConversionRate() >= MINIMUM_USD, "You need to spend more ETH!");
-        // require(PriceConverter.getConversionRate(msg.value) >= MINIMUM_USD, "You need to spend more ETH!");
-        addressToAmountFunded[msg.sender] += msg.value;
-        funders.push(msg.sender);
+    
+        // Check if the sender address already exists in the funders array
+        bool isFunder = false;
+        for(uint256 i = 0; i < funders.length; i++) {
+            if(funders[i] == msg.sender) {
+                isFunder = true;
+                break;
+            }
+        }
+        // If sender address is not already in the funders array, add it
+        if(!isFunder) {
+            addressToAmountFunded[msg.sender] += msg.value;
+            funders.push(msg.sender);
+        }
     }
     
     function getVersion() public view returns (uint256){
